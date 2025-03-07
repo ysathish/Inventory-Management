@@ -1,6 +1,7 @@
 package com.nt.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,9 +13,9 @@ import com.nt.model.InventoryModel;
 @Repository
 public class InventoryRepo 
 {
-
-	private JdbcTemplate jdbc;
 	@Autowired
+	private JdbcTemplate jdbc;
+	
 	public InventoryRepo(JdbcTemplate jdbc) { // Constructor Injection
 		this.jdbc = jdbc;
 	}
@@ -60,7 +61,7 @@ public class InventoryRepo
 		jdbc.update(sql,product_id);
 	}
 
-	public InventoryModel findById(Long product_id) {
+	public Optional<InventoryModel> findById(Long product_id) {
 		String sql="select product_id,product_name,price,quantity from inventory where product_id=?";
 		RowMapper<InventoryModel> mapper=(rs,rowNum)->new InventoryModel(
 				rs.getLong("product_id"),
@@ -68,6 +69,7 @@ public class InventoryRepo
 				rs.getFloat("price"),
 				rs.getInt("quantity")
 				);	
-		return jdbc.queryForObject(sql, mapper,product_id);
+		List<InventoryModel> result=jdbc.query(sql, mapper,product_id);
+		return result.isEmpty()? Optional.empty():Optional.of(result.get(0));
 	}
 }

@@ -33,8 +33,9 @@ public class InventoryService
 
 	
 
-	public void putInventory(Long product_id, InventoryModel inventory) {
-		repo.update(product_id,inventory);
+	public boolean putInventory(Long product_id, InventoryModel inventory) {
+		int rows=repo.update(product_id,inventory);
+		return rows>0;
 		
 	}
 
@@ -44,7 +45,7 @@ public class InventoryService
 	}
 
 	public InventoryModel getByinventoryId(Long product_id) {
-		return repo.findById(product_id);
+		return repo.findById(product_id).orElse(null);
 	}
 	
 	
