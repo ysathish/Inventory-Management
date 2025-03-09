@@ -2,9 +2,20 @@ package com.nt.model;
 
 import org.springframework.stereotype.Component;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 @Component
+@Entity
+@Table(name = "inventory")
+
 public class InventoryModel 
 {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long product_id;
 	private String product_name;
 	private float price;
