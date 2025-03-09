@@ -23,64 +23,38 @@ public class InventoryController
 { 
 	@Autowired
 	private InventoryService service;
+	
 	@GetMapping("/inventory")
-	public List<InventoryModel> getInventory()
+	public List<InventoryModel> getAll()
 	{
 		return service.getInventory();
 	}
+	
 	@GetMapping("/inventory/{product_id}")
-	public ResponseEntity<?> getById(@PathVariable Long product_id)
+	public ResponseEntity<InventoryModel> getById(@PathVariable Long product_id)
 	{
-		if(product_id==0|| product_id<=0)
-		{
-			return ResponseEntity.badRequest().body("Invalid Id");
-		}
-		InventoryModel inventory=service.getByinventoryId(product_id);
-		if(inventory==null)
-		{
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Inventory not found"+product_id);
-		}
+		InventoryModel inventory = service.getByinventoryId(product_id);
 		return ResponseEntity.ok(inventory);
 	}
-	//ResponseEntity<T> is a generic class in Spring Boot that represents an HTTP response, including:
-
-//Response body (data sent back)
-//HTTP status code (e.g., 200 OK, 400 Bad Request)
-//Headers (optional metadata)
-//It is commonly used in REST APIs to send customized responses.
+	
 	@PostMapping("/inventory")
 	public ResponseEntity<String> post(@RequestBody InventoryModel inventory)
 	{
 		service.postInventory(inventory);
-		return ResponseEntity.ok("inventory added successfully !");
+		return ResponseEntity.ok("Inventory added successfully!");
 	}
 	
 	@PutMapping("/inventory/{product_id}")
-	//@PathVariable is an annotation in Spring Boot that is used to extract values from the URL 
-	//path and map them to method parameters in a controller.
-	public ResponseEntity<?> put(@PathVariable Long product_id, @RequestBody InventoryModel inventory )
+	public ResponseEntity<String> put(@PathVariable Long product_id, @RequestBody InventoryModel inventory )
 	{
-		if(product_id==null||product_id<=0)
-		{
-			return ResponseEntity.badRequest().body("Invalid id");
-		}
-		if(inventory.getProduct_name()==null|| inventory.getPrice()<=0||inventory.getQuantity()<=0)
-		{
-			return ResponseEntity.badRequest().body("invalid product data Please check name, price and quantity");
-		}
-		boolean isUpdated=service.putInventory(product_id, inventory);
-		if(!isUpdated)
-		{
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("inventory not found "+product_id);
-		}
-		return ResponseEntity.ok("Inventory updated successfully!");
+		service.putInventory(product_id, inventory);
+        return ResponseEntity.ok("Inventory updated successfully!");
 	}
+	
 	@DeleteMapping("/inventory/{product_id}")
 	public ResponseEntity<String> delete(@PathVariable Long product_id)
 	{
 		service.deleteInventory(product_id);
-		return ResponseEntity.ok("inventory with Id  "+product_id+ "  deleted   susessfully !");
+		return ResponseEntity.ok("Inventory with ID " + product_id + " deleted successfully!");
 	}
- 
-
-} 
+}
