@@ -74,8 +74,8 @@ pipeline {
                 docker run -d -p 8081:8081 --name $CONTAINER_NAME \
                 --link $DB_CONTAINER_NAME:postgres \
                 -e SPRING_DATASOURCE_URL=jdbc:postgresql://$DB_CONTAINER_NAME:$DB_PORT/inventory \
-                -e SPRING_DATASOURCE_USERNAME=$DB_USER \
-                -e SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD \
+                -e SPRING_DATASOURCE_USERNAME=$postgres \
+                -e SPRING_DATASOURCE_PASSWORD=$postgres \
                 $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
                 """
             }
