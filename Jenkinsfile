@@ -9,7 +9,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+<<<<<<< HEAD
                 git 'your-git-repo-url'
+=======
+                git 'https://github.com/ysathish/Inventory-Management.git'
+>>>>>>> 4562e8bc465a934ff2d3fa66fffc8ff276d6b4c3
             }
         }
 
