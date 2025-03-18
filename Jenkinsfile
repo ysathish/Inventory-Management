@@ -1,20 +1,14 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_IMAGE_NAME = 'inventory-management-system'
-        DOCKER_IMAGE_TAG = 'latest'
-        CONTAINER_NAME = 'inventory-container'
-        DB_CONTAINER_NAME = 'my-postgres'
-        DB_PORT = '5432'
-        DB_USER = 'postgres'
-        DB_PASSWORD = 'password'
+        IMAGE_NAME = "inventory-management:latest"
+        CONTAINER_NAME = "inventory_management_container"
+        DB_CONTAINER_NAME = "postgres"
     }
-
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/ysathish/Inventory-Management.git'
             }
         }
 
@@ -24,60 +18,47 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Create Docker Image') {
             steps {
-                sh 'mvn test'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
-        stage('Start PostgreSQL Container') {
+        stage('PostgreSQL Setup') {
             steps {
-                script {
-                    // Check if DB container exists, if not start one
-                    def dbExists = sh(script: "docker ps -a --filter name=$DB_CONTAINER_NAME | grep $DB_CONTAINER_NAME || true", returnStatus: true)
-                    if (dbExists != 0) {
-                        sh """
-                        docker run -d \
-                        --name $DB_CONTAINER_NAME \
-                        -e POSTGRES_USER=$DB_USER \
-                        -e POSTGRES_PASSWORD=$DB_PASSWORD \
-                        -p $DB_PORT:5432 \
-                        postgres:latest
-                        """
-                    } else {
-                        echo "PostgreSQL container already running."
-                    }
-                }
+                sh '''
+                docker stop $DB_CONTAINER_NAME || true
+                docker rm $DB_CONTAINER_NAME || true
+                docker run -d --name $DB_CONTAINER_NAME \
+                    -e POSTGRES_DB=inventory \
+                    -e POSTGRES_USER=postgres \
+                    -e POSTGRES_PASSWORD=postgres \
+                    -p 5432:5432 \
+                    postgres:latest
+                '''
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Stop and Remove Old Container') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG .'
+                sh '''
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
+                '''
             }
         }
 
-        stage('Stop Existing App Container') {
+        stage('Run Docker Container') {
             steps {
-                script {
-                    sh """
-                    docker ps -q --filter "name=$CONTAINER_NAME" | grep -q . && docker stop $CONTAINER_NAME || echo 'No running container to stop'
-                    docker ps -a -q --filter "name=$CONTAINER_NAME" | grep -q . && docker rm $CONTAINER_NAME || echo 'No existing container to remove'
-                    """
-                }
-            }
-        }
-
-        stage('Run Docker Container with DB') {
-            steps {
-                sh """
-                docker run -d -p 8081:8081 --name $CONTAINER_NAME \
-                --link $DB_CONTAINER_NAME:postgres \
-                -e SPRING_DATASOURCE_URL=jdbc:postgresql://$DB_CONTAINER_NAME:$DB_PORT/inventory \
-                -e SPRING_DATASOURCE_USERNAME=$postgres \
-                -e SPRING_DATASOURCE_PASSWORD=$postgres \
-                $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
-                """
+                sh '''
+                docker run -d --name $CONTAINER_NAME \
+                    --link $DB_CONTAINER_NAME:postgres \
+                    -p 8081:8080 \
+                    -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory \
+                    -e SPRING_DATASOURCE_USERNAME=postgres \
+                    -e SPRING_DATASOURCE_PASSWORD=postgres \
+                    $IMAGE_NAME
+                '''
             }
         }
     }
