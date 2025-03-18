@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE_NAME = "inventory-management:latest"
         CONTAINER_NAME = "inventory_management_container"
-        DB_CONTAINER_NAME = "inventory_postgres"
+        DB_CONTAINER_NAME = "my-postgres"
     }
     stages {
         stage('Checkout') {
@@ -50,7 +50,7 @@ pipeline {
                     -e POSTGRES_DB=inventory \
                     -e POSTGRES_USER=postgres \
                     -e POSTGRES_PASSWORD=postgres \
-                    -p 5433:5432 \
+                    -p 5432:5432 \
                     postgres:latest
                 '''
             }
