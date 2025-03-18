@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE_NAME = "inventory-management:latest"
         CONTAINER_NAME = "inventory_management_container"
-        DB_CONTAINER_NAME = "postgres"
+        DB_CONTAINER_NAME = "my-postgres"
     }
     stages {
         stage('Checkout') {
