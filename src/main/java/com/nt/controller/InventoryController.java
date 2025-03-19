@@ -23,6 +23,11 @@ public class InventoryController
 { 
 	@Autowired
 	private InventoryService service;
+	@GetMapping("/jen")
+	public String Wrokingfine()
+	{
+		return "Jenkin Working fine";
+	}
 	
 	@GetMapping("/inventory")
 	public List<InventoryModel> getAll()
